@@ -9,16 +9,20 @@
         Loaded="Window_Loaded"
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
-        <wpf:WebView2 x:Name="webView2" Margin="10" Height="300" Width="700">
-            
-        </wpf:WebView2>
-        <StackPanel Orientation="Horizontal">
+        <wpf:WebView2 x:Name="webView2" Margin="10" Height="300" Width="700" />
+
+
+        <StackPanel Orientation="Horizontal" Margin="10">
             <TextBlock Text="Organization名"/>
             <TextBox x:Name="tbOrganizationName" Width="200"/>
             <TextBlock Text="Project名"/>
             <TextBox x:Name="tbProjectName" Width="200"/>
             <TextBlock Text="Repository名"/>
             <TextBox x:Name="tbRepositoryName" Width="200"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <TextBlock Text="自分のメールアドレス"/>
+            <TextBox x:Name="tbSelfMailAddr" Width="600"/>
         </StackPanel>
         <Button Content="情報取得" Click="Button_Click" Margin="10"/>
     </StackPanel>

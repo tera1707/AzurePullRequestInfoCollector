@@ -11,6 +11,7 @@ public partial class MainWindow : Window
     private string OrganizatioinName = "tera1707";
     private string ProjectName = "TeraPrivateProject";
     private string RepositoryName = "TeraPrivateProject";
+    private string SelfMailAddr = "tera1707@gmail.com";
 
     WebAccess? wa;
 
@@ -24,6 +25,7 @@ public partial class MainWindow : Window
         tbOrganizationName.Text = "tera1707";
         tbProjectName.Text = "TeraPrivateProject";
         tbRepositoryName.Text = "TeraPrivateProject";
+        tbSelfMailAddr.Text = "tera1707@gmail.com";
 
         wa = new WebAccess(webView2);
     }
@@ -90,6 +92,8 @@ public partial class MainWindow : Window
             var threads = repo.threadsInfo;
             var threadsCount = threads.count;
 
+            SelfMailAddr = tbSelfMailAddr.Text;
+
             for (int j = 0; j < threadsCount; j++)
             {
                 var thread = threads.value[j];
@@ -98,9 +102,19 @@ public partial class MainWindow : Window
                 var prUrl = GetPullReqUrlFromPullReqRefString(href);
                 var prId = GetPullReqIdFromPullReqRefString(href);
 
+                if ((thread.status == "active" && thread.comments.First().author.uniqueName == SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr)
+                    // スレッド作成者＝自分でActiveなスレッドで最終コメントが自分でないスレッド（人のプルリクにコメントして、回答が来てるもの）
+                    || (thread.status == "active" && thread.comments.First().author.uniqueName != SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr && thread.comments.Any(x => x.author.uniqueName == SelfMailAddr)))
+                    // スレッド作成者≠自分で自分がコメントしていて最終コメントが自分でないスレッド（自分のプルリクのコメントに自分が回答して、回答待ちのもの）
+                {
+                    Debug.Write("〇");
+                }
+                else
+                {
+                    Debug.Write("×");
+                }
                 Debug.Write($"pullRequestId = {pr.pullRequestId}, プルリクst = {pr.status}, createBy = {pr.createdBy.displayName}, title={pr.title}, 作成日={pr.creationDate}, 生存期間={(DateTime.Now - pr.creationDate).Days}日, ");
                 Debug.WriteLine($"先頭コメント：{thread.comments.First().content}, st：{thread.status}, 先頭コメント者：{thread.comments.First().author.uniqueName}, 最後尾コメント者：{thread.comments.Last().author.uniqueName}, リンク：{prUrl}");
-
             }
         }
     }
