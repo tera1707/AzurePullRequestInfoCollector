@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PullReqInfoCollector.Data.PullRequestsThreads;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,6 +42,8 @@ public class Repository
     public string name { get; set; }
     public string url { get; set; }
     public Project project { get; set; }
+
+    public PullRequestsThreadsInfo threadsInfo { get; set; }
 }
 
 public class Project
