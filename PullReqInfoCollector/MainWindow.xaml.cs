@@ -15,7 +15,7 @@ public partial class MainWindow : Window
 {
     private string OrganizatioinName = "tera1707";
     private string ProjectName = "TeraPrivateProject";
-    private string RepositoryName = "TeraPrivateProject";
+    //private string RepositoryName = "TeraPrivateProject";
     private string SelfMailAddr = "tera1707@gmail.com";
 
     WebAccess? wa;
@@ -29,7 +29,7 @@ public partial class MainWindow : Window
     {
         tbOrganizationName.Text = "tera1707";
         tbProjectName.Text = "TeraPrivateProject";
-        tbRepositoryName.Text = "TeraPrivateProject";
+        //tbRepositoryName.Text = "TeraPrivateProject";
         tbSelfMailAddr.Text = "tera1707@gmail.com";
 
         wa = new WebAccess(webView2);
@@ -73,11 +73,12 @@ public partial class MainWindow : Window
     {
         OrganizatioinName = tbOrganizationName.Text;
         ProjectName = tbProjectName.Text;
-        RepositoryName = tbRepositoryName.Text;
+        //RepositoryName = tbRepositoryName.Text;
         SelfMailAddr = tbSelfMailAddr.Text;
 
-
-
+        // 一旦表示をクリア
+        lbPullRequest.Items.Clear();
+        lbThread.Items.Clear();
 
         var repoInfo = await wa.GetContentAsync<RepositoryInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories?api-version=7.1-preview.1&searchCriteria.status=all");
 
@@ -126,36 +127,48 @@ public partial class MainWindow : Window
                     prUrl = GetPullReqUrlFromPullReqRefString(repo.name, href);
                     //var prId = GetPullReqIdFromPullReqRefString(href);
 
-                    var txtThread = "";
+                    ///////////////////////////////////
+                    // スレッド(コメント情報の表示)
+                    ///////////////////////////////////
+                    var txtThread = $"{repo.name}, {pr.title} 先頭：{thread.comments.First().content.ToString().Replace("\n", "")}, st：{thread.status}, 先頭者：{thread.comments.First().author.uniqueName}, 末尾者：{thread.comments.Last().author.uniqueName}";
+
                     if ((thread.status == "active" && thread.comments.First().author.uniqueName == SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr)
                         // スレッド作成者＝自分でActiveなスレッドで最終コメントが自分でないスレッド（人のプルリクにコメントして、回答が来てるもの）
                         || (thread.status == "active" && thread.comments.First().author.uniqueName != SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr && thread.comments.Any(x => x.author.uniqueName == SelfMailAddr)))
                     // スレッド作成者≠自分で自分がコメントしていて最終コメントが自分でないスレッド（自分のプルリクのコメントに自分が回答して、回答待ちのもの）
                     {
-                        txtThread = "〇 ";
+                        txtThread = "〇 " + txtThread;
+                        lbThread.Items.Add(new DisplayData(txtThread, prUrl));
                     }
                     else
                     {
-                        txtThread = "× ";
+                        txtThread = "× " + txtThread;
+                        if (cbAllDisp.IsChecked == true)
+                            lbThread.Items.Add(new DisplayData(txtThread, prUrl));
                     }
-                    txtThread += $"{repo.name}, {pr.title} 先頭：{thread.comments.First().content.ToString().Replace("\n", "")}, st：{thread.status}, 先頭：{thread.comments.First().author.uniqueName}, 末尾：{thread.comments.Last().author.uniqueName}";
-                    //Debug.Write($"pullRequestId = {pr.pullRequestId}, プルリクst = {pr.status}, createBy = {pr.createdBy.displayName}, title={pr.title}, 作成日={pr.creationDate}, 生存期間={(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}");
                     Debug.WriteLine(txtThread);
-                    lbThread.Items.Add(new DisplayData(txtThread, prUrl));
                 }
 
-                var target = (pr.createdBy.uniqueName == SelfMailAddr) ? "〇" : "×";
-                var txtPr = $"{target} {pr.title}, st：{pr.status}, 作成者：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, {(DateTime.Now - pr.creationDate).Days}日経過, コメント数：{threadCount}";
+
+                ///////////////////////////////////
+                // プルリク情報の表示
+                ///////////////////////////////////
+                var txtPr = $"{pr.title}, st：{pr.status}, 作成者：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, {(DateTime.Now - pr.creationDate).Days}日経過, コメント数：{threadCount}";
+
+                if (pr.createdBy.uniqueName == SelfMailAddr && pr.status == "active")
+                {
+                    txtPr = "〇" + txtPr;
+                    lbPullRequest.Items.Add(new DisplayData(txtPr, prUrl));
+                }
+                else
+                {
+                    txtPr = "×" + txtPr;
+                    if (cbAllDisp.IsChecked == true)
+                        lbPullRequest.Items.Add(new DisplayData(txtPr, prUrl));
+                }
                 Debug.WriteLine(txtPr);
-                lbPullRequest.Items.Add(new DisplayData(txtPr, prUrl));
             }
         }
-
-
-
-        //var prInfo = await wa.GetContentAsync<PullRequestsInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullrequests?api-version=7.1-preview.1&searchCriteria.status=all");
-
-
     }
 
     private record DisplayData(string DisplayString, string Url);
@@ -185,7 +198,7 @@ public class Value
     public string id { get; set; }
     public string name { get; set; }
     public string url { get; set; }
-    public Project project { get; set; }
+    public Project project { get; set; }//Projectと名前があるが、実際はリポジトリ情報を格納している
     public string defaultBranch { get; set; }
     public int size { get; set; }
     public string remoteUrl { get; set; }
