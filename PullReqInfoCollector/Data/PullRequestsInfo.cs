@@ -34,6 +34,7 @@ public class Value
     public Reviewer[] reviewers { get; set; }
     public string url { get; set; }
     public bool supportsIterations { get; set; }
+    public PullRequestsThreadsInfo threadsInfo { get; set; }
 }
 
 public class Repository
@@ -43,7 +44,6 @@ public class Repository
     public string url { get; set; }
     public Project project { get; set; }
 
-    public PullRequestsThreadsInfo threadsInfo { get; set; }
 }
 
 public class Project
