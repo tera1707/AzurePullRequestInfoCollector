@@ -1,0 +1,25 @@
+﻿<Window x:Class="PullReqInfoCollector.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PullReqInfoCollector" 
+        xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Loaded="Window_Loaded"
+        Title="MainWindow" Height="450" Width="800">
+    <StackPanel>
+        <wpf:WebView2 x:Name="webView2" Margin="10" Height="300" Width="700">
+            
+        </wpf:WebView2>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Organization名"/>
+            <TextBox x:Name="tbOrganizationName" Width="200"/>
+            <TextBlock Text="Project名"/>
+            <TextBox x:Name="tbProjectName" Width="200"/>
+            <TextBlock Text="Repository名"/>
+            <TextBox x:Name="tbRepositoryName" Width="200"/>
+        </StackPanel>
+        <Button Content="情報取得" Click="Button_Click" Margin="10"/>
+    </StackPanel>
+</Window>
