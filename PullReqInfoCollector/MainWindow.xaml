@@ -7,13 +7,14 @@
         xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="900" Width="1800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
         
         <wpf:WebView2 x:Name="webView2" Grid.Row="0" Margin="10" />
@@ -30,6 +31,37 @@
             <TextBlock Text="自分のメールアドレス"/>
             <TextBox x:Name="tbSelfMailAddr" Width="600"/>
         </StackPanel>
-        <Button Grid.Row="3" x:Name="btGetInfo" Content="情報取得" Click="Button_Click" Margin="10"/>
+        <Button Grid.Row="3" x:Name="btGetInfo" Content="情報取得" Click="Button_Click" Margin="10" IsEnabled="False"/>
+
+        <Grid ShowGridLines="True" Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox x:Name="lbPullRequest" Grid.Column="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="String">
+                        <TextBlock>
+                            <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
+                                <TextBlock Text="{Binding DisplayString}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <ListBox x:Name="lbThread" Grid.Column="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="String">
+                        <TextBlock>
+                            <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
+                                <TextBlock Text="{Binding DisplayString}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </Grid>
 </Window>

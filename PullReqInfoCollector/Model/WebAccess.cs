@@ -17,6 +17,14 @@ internal class WebAccess : IDisposable
     {
         _webView2 = webView2;
 
+    }
+
+    public async Task Initialize(string initPage)
+    {
+        manualEvent = new ManualResetEvent(false);
+        _webView2.Source = new Uri(initPage);
+
+
         _webView2.CoreWebView2InitializationCompleted += ((sender, e) =>
         {
             _webView2.CoreWebView2.WebResourceResponseReceived += (async (s, e) =>
@@ -36,14 +44,7 @@ internal class WebAccess : IDisposable
                 }
             });
         });
-
-    }
-
-    public async Task Initialize(string initPage)
-    {
-        manualEvent = new ManualResetEvent(false);
         await _webView2.EnsureCoreWebView2Async(null);
-        _webView2.Source = new Uri(initPage);
     }
 
     public async Task<T?> GetContentAsync<T>(string url)
@@ -70,6 +71,8 @@ internal class WebAccess : IDisposable
 
     public void Dispose()
     {
-        //manualEvent.Dispose();
+        _webView2 = null;
+        manualEvent.Dispose();
+        manualEvent = null;
     }
 }

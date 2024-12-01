@@ -3,6 +3,9 @@ using PullReqInfoCollector.Data.PullRequestsThreads;
 using PullReqInfoCollector.Model;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Navigation;
 
 namespace PullReqInfoCollector;
 
@@ -28,10 +31,10 @@ public partial class MainWindow : Window
         tbSelfMailAddr.Text = "tera1707@gmail.com";
 
         wa = new WebAccess(webView2);
-        await wa.Initialize($"https://dev.azure.com/{OrganizatioinName}/_git/{ProjectName}");
+        await wa.Initialize($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullrequests?api-version=7.1-preview.1&searchCriteria.status=all");
 
         btGetInfo.IsEnabled = false;
-        await Task.Delay(10000);
+        await Task.Delay(1000);
         btGetInfo.IsEnabled = true;
     }
 
@@ -94,33 +97,54 @@ public partial class MainWindow : Window
             var repo = pr.repository;
             var threads = repo.threadsInfo;
             var threadsCount = threads.count;
+            var prUrl = "";
 
             SelfMailAddr = tbSelfMailAddr.Text;
-
-            Debug.WriteLine($"タイトル：{pr.title}, st：{pr.status}, createBy：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, 生存期間：{(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}");
 
             for (int j = 0; j < threadsCount; j++)
             {
                 var thread = threads.value[j];
 
-                var href = thread.comments.First()._links.self.href;
-                var prUrl = GetPullReqUrlFromPullReqRefString(href);
-                var prId = GetPullReqIdFromPullReqRefString(href);
+                if (thread.comments is null || thread.comments.Length == 0)
+                    continue;
 
+                var href = thread.comments.First()._links.self.href;
+                prUrl = GetPullReqUrlFromPullReqRefString(href);
+                //var prId = GetPullReqIdFromPullReqRefString(href);
+
+                var txtThread = "";
                 if ((thread.status == "active" && thread.comments.First().author.uniqueName == SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr)
                     // スレッド作成者＝自分でActiveなスレッドで最終コメントが自分でないスレッド（人のプルリクにコメントして、回答が来てるもの）
                     || (thread.status == "active" && thread.comments.First().author.uniqueName != SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr && thread.comments.Any(x => x.author.uniqueName == SelfMailAddr)))
                     // スレッド作成者≠自分で自分がコメントしていて最終コメントが自分でないスレッド（自分のプルリクのコメントに自分が回答して、回答待ちのもの）
                 {
-                    Debug.Write("  〇");
+                    txtThread = "〇 ";
                 }
                 else
                 {
-                    Debug.Write("  ×");
+                    txtThread = "× ";
                 }
+                txtThread += $"タイトル：{pr.title} 先頭コメント：{thread.comments.First().content.ToString().Replace("\n", "")}, st：{thread.status}, 先頭コメント者：{thread.comments.First().author.uniqueName}, 最後尾コメント者：{thread.comments.Last().author.uniqueName}";
                 //Debug.Write($"pullRequestId = {pr.pullRequestId}, プルリクst = {pr.status}, createBy = {pr.createdBy.displayName}, title={pr.title}, 作成日={pr.creationDate}, 生存期間={(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}");
-                Debug.WriteLine($" 先頭コメント：{thread.comments.First().content}, st：{thread.status}, 先頭コメント者：{thread.comments.First().author.uniqueName}, 最後尾コメント者：{thread.comments.Last().author.uniqueName}, リンク：{prUrl}");
+                Debug.WriteLine(txtThread);
+                lbThread.Items.Add(new DisplayData(txtThread, prUrl));
             }
+
+            var target = (pr.createdBy.uniqueName == SelfMailAddr) ? "〇" : "×";
+            var txtPr = $"{target} タイトル：{pr.title}, st：{pr.status}, createBy：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, 生存期間：{(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}";
+            Debug.WriteLine(txtPr);
+            lbPullRequest.Items.Add(new DisplayData(txtPr, prUrl));
         }
+    }
+
+    private record DisplayData(string DisplayString, string Url);
+
+
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        var si = new ProcessStartInfo(e.Uri.AbsoluteUri);
+        si.UseShellExecute = true;
+        Process.Start(si);
+        e.Handled = true;
     }
 }
