@@ -20,7 +20,7 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
         tbOrganizationName.Text = "tera1707";
         tbProjectName.Text = "TeraPrivateProject";
@@ -28,6 +28,11 @@ public partial class MainWindow : Window
         tbSelfMailAddr.Text = "tera1707@gmail.com";
 
         wa = new WebAccess(webView2);
+        await wa.Initialize($"https://dev.azure.com/{OrganizatioinName}/_git/{ProjectName}");
+
+        btGetInfo.IsEnabled = false;
+        await Task.Delay(10000);
+        btGetInfo.IsEnabled = true;
     }
 
     private async void Button_Click(object sender, RoutedEventArgs e)
@@ -65,9 +70,7 @@ public partial class MainWindow : Window
         ProjectName = tbProjectName.Text;
         RepositoryName = tbRepositoryName.Text;
 
-        await wa.Initialize();
-
-        var prInfo = await wa.Get<PullRequestsInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullrequests?api-version=7.1-preview.1&searchCriteria.status=all");
+        var prInfo = await wa.GetContentAsync<PullRequestsInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullrequests?api-version=7.1-preview.1&searchCriteria.status=all");
 
         if (prInfo is null)
         {
@@ -79,7 +82,7 @@ public partial class MainWindow : Window
 
         for (int i = 0; i < ctr; i++)
         {
-            var thInfo = await wa.Get<PullRequestsThreadsInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullRequests/{prInfo.value[i].pullRequestId}/threads?api-version=7.1-preview.1");
+            var thInfo = await wa.GetContentAsync<PullRequestsThreadsInfo>($"https://dev.azure.com/{OrganizatioinName}/{ProjectName}/_apis/git/repositories/{RepositoryName}/pullRequests/{prInfo.value[i].pullRequestId}/threads?api-version=7.1-preview.1");
 
             prInfo.value[i].repository.threadsInfo = thInfo;
         }
@@ -94,6 +97,8 @@ public partial class MainWindow : Window
 
             SelfMailAddr = tbSelfMailAddr.Text;
 
+            Debug.WriteLine($"タイトル：{pr.title}, st：{pr.status}, createBy：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, 生存期間：{(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}");
+
             for (int j = 0; j < threadsCount; j++)
             {
                 var thread = threads.value[j];
@@ -107,14 +112,14 @@ public partial class MainWindow : Window
                     || (thread.status == "active" && thread.comments.First().author.uniqueName != SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr && thread.comments.Any(x => x.author.uniqueName == SelfMailAddr)))
                     // スレッド作成者≠自分で自分がコメントしていて最終コメントが自分でないスレッド（自分のプルリクのコメントに自分が回答して、回答待ちのもの）
                 {
-                    Debug.Write("〇");
+                    Debug.Write("  〇");
                 }
                 else
                 {
-                    Debug.Write("×");
+                    Debug.Write("  ×");
                 }
-                Debug.Write($"pullRequestId = {pr.pullRequestId}, プルリクst = {pr.status}, createBy = {pr.createdBy.displayName}, title={pr.title}, 作成日={pr.creationDate}, 生存期間={(DateTime.Now - pr.creationDate).Days}日, ");
-                Debug.WriteLine($"先頭コメント：{thread.comments.First().content}, st：{thread.status}, 先頭コメント者：{thread.comments.First().author.uniqueName}, 最後尾コメント者：{thread.comments.Last().author.uniqueName}, リンク：{prUrl}");
+                //Debug.Write($"pullRequestId = {pr.pullRequestId}, プルリクst = {pr.status}, createBy = {pr.createdBy.displayName}, title={pr.title}, 作成日={pr.creationDate}, 生存期間={(DateTime.Now - pr.creationDate).Days}日, コメント数：{threadsCount}");
+                Debug.WriteLine($" 先頭コメント：{thread.comments.First().content}, st：{thread.status}, 先頭コメント者：{thread.comments.First().author.uniqueName}, 最後尾コメント者：{thread.comments.Last().author.uniqueName}, リンク：{prUrl}");
             }
         }
     }

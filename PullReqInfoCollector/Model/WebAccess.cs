@@ -39,18 +39,14 @@ internal class WebAccess : IDisposable
 
     }
 
-    public async Task Initialize()
+    public async Task Initialize(string initPage)
     {
         manualEvent = new ManualResetEvent(false);
         await _webView2.EnsureCoreWebView2Async(null);
+        _webView2.Source = new Uri(initPage);
     }
 
-    public void Dispose()
-    {
-        //manualEvent.Dispose();
-    }
-
-    public async Task<T?> Get<T>(string url)
+    public async Task<T?> GetContentAsync<T>(string url)
     {
         manualEvent.Reset();
 
@@ -70,5 +66,10 @@ internal class WebAccess : IDisposable
 
         //var jsonObj = JsonSerializer.Deserialize<T>(text);
         return text;
+    }
+
+    public void Dispose()
+    {
+        //manualEvent.Dispose();
     }
 }

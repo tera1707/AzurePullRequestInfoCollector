@@ -30,6 +30,6 @@
             <TextBlock Text="自分のメールアドレス"/>
             <TextBox x:Name="tbSelfMailAddr" Width="600"/>
         </StackPanel>
-        <Button Grid.Row="3" Content="情報取得" Click="Button_Click" Margin="10"/>
+        <Button Grid.Row="3" x:Name="btGetInfo" Content="情報取得" Click="Button_Click" Margin="10"/>
     </Grid>
 </Window>
