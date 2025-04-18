@@ -30,7 +30,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
             <TextBlock Text="自分のメールアドレス"/>
             <TextBox x:Name="tbSelfMailAddr" Width="600"/>
-            <CheckBox x:Name="cbAllDisp" Content="担当外・Close済みも表示"/>
+            <CheckBox x:Name="cbAllDisp" Content="担当外・Close済みも表示" IsChecked="True"/>
         </StackPanel>
         <Button Grid.Row="3" x:Name="btGetInfo" Content="情報取得" Click="Button_Click" Margin="10" IsEnabled="False"/>
 
