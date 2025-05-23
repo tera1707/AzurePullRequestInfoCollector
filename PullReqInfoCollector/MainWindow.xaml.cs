@@ -1,5 +1,6 @@
 ﻿using PullReqInfoCollector.Data.PullRequests;
 using PullReqInfoCollector.Data.PullRequestsThreads;
+using PullReqInfoCollector.Data.Repository;
 using PullReqInfoCollector.Model;
 using System.Diagnostics;
 using System.Security.Policy;
@@ -19,6 +20,7 @@ public partial class MainWindow : Window
     private string SelfMailAddr = "tera1707@gmail.com";
 
     WebAccess? wa;
+    private record DisplayData(string DisplayString, string Url);
 
     public MainWindow()
     {
@@ -127,22 +129,27 @@ public partial class MainWindow : Window
                     prUrl = GetPullReqUrlFromPullReqRefString(repo.name, href);
                     //var prId = GetPullReqIdFromPullReqRefString(href);
 
+
+                    if (thread.comments.First().commentType == "system")
+                        continue;
+
                     ///////////////////////////////////
                     // スレッド(コメント情報の表示)
                     ///////////////////////////////////
                     var txtThread = $"{repo.name}, {pr.title} 先頭：{thread.comments.First().content.ToString().Replace("\n", "")}, st：{thread.status}, 先頭者：{thread.comments.First().author.uniqueName}, 末尾者：{thread.comments.Last().author.uniqueName}";
+                    //var txtThread = $"{thread.comments.First().content.ToString().Replace("\n", "")}";
 
                     if ((thread.status == "active" && thread.comments.First().author.uniqueName == SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr)
                         // スレッド作成者＝自分でActiveなスレッドで最終コメントが自分でないスレッド（人のプルリクにコメントして、回答が来てるもの）
                         || (thread.status == "active" && thread.comments.First().author.uniqueName != SelfMailAddr && thread.comments.Last().author.uniqueName != SelfMailAddr && thread.comments.Any(x => x.author.uniqueName == SelfMailAddr)))
                     // スレッド作成者≠自分で自分がコメントしていて最終コメントが自分でないスレッド（自分のプルリクのコメントに自分が回答して、回答待ちのもの）
                     {
-                        txtThread = "〇 " + txtThread;
+                        //txtThread = "〇 " + txtThread;
                         lbThread.Items.Add(new DisplayData(txtThread, prUrl));
                     }
                     else
                     {
-                        txtThread = "× " + txtThread;
+                        //txtThread = "× " + txtThread;
                         if (cbAllDisp.IsChecked == true)
                             lbThread.Items.Add(new DisplayData(txtThread, prUrl));
                     }
@@ -154,7 +161,7 @@ public partial class MainWindow : Window
                 // プルリク情報の表示
                 ///////////////////////////////////
                 var txtPr = $"{pr.title}, st：{pr.status}, 作成者：{pr.createdBy.displayName}, 作成日：{pr.creationDate.ToString("yyyy/MM/dd")}, {(DateTime.Now - pr.creationDate).Days}日経過, コメント数：{threadCount}";
-
+                
                 if (pr.createdBy.uniqueName == SelfMailAddr && pr.status == "active")
                 {
                     txtPr = "〇" + txtPr;
@@ -166,12 +173,12 @@ public partial class MainWindow : Window
                     if (cbAllDisp.IsChecked == true)
                         lbPullRequest.Items.Add(new DisplayData(txtPr, prUrl));
                 }
-                Debug.WriteLine(txtPr);
+
+                //Debug.WriteLine(txtPr);
             }
         }
     }
 
-    private record DisplayData(string DisplayString, string Url);
 
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -186,37 +193,3 @@ public partial class MainWindow : Window
 
 
 
-
-public class RepositoryInfo
-{
-    public Value[] value { get; set; }
-    public int count { get; set; }
-}
-
-public class Value
-{
-    public string id { get; set; }
-    public string name { get; set; }
-    public string url { get; set; }
-    public Project project { get; set; }//Projectと名前があるが、実際はリポジトリ情報を格納している
-    public string defaultBranch { get; set; }
-    public int size { get; set; }
-    public string remoteUrl { get; set; }
-    public string sshUrl { get; set; }
-    public string webUrl { get; set; }
-    public bool isDisabled { get; set; }
-    public bool isInMaintenance { get; set; }
-}
-
-public class Project
-{
-    public string id { get; set; }
-    public string name { get; set; }
-    public string url { get; set; }
-    public string state { get; set; }
-    public int revision { get; set; }
-    public string visibility { get; set; }
-    public DateTime lastUpdateTime { get; set; }
-
-    public PullRequestsInfo PullRequests { get; set; }
-}
