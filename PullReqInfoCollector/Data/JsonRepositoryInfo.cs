@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PullReqInfoCollector.Data.Repository;
-public class RepositoryInfo
+public class JsonRepositoryInfo
 {
     public Value[] value { get; set; }
     public int count { get; set; }
@@ -37,6 +37,6 @@ public class Project
     public string visibility { get; set; }
     public DateTime lastUpdateTime { get; set; }
 
-    public PullRequestsInfo PullRequests { get; set; }
+    public JsonPullRequestsInfo PullRequests { get; set; }
 }
 
