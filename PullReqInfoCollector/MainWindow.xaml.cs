@@ -91,7 +91,7 @@ public partial class MainWindow : Window
 
     private async Task Connect(AppServiceInfo asi)
     {
-        if (_app == null)
+        if (_app != null)
             Disconnect();
 
         _app = new AppService();
