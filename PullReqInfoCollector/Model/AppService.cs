@@ -23,6 +23,9 @@ internal class AppService : IDisposable
         _appServiceInfo = appServiceInfo;
         _wa = new WebAccess(webView2);
         await _wa.Initialize($"https://dev.azure.com/{appServiceInfo.OrganizatioinName}/{appServiceInfo.ProjectName}/_apis/git/repositories?api-version=7.1-preview.1&searchCriteria.status=all");
+
+        // とりあえず1秒待つ
+        await Task.Delay(1000);
     }
 
     public void Dispose()

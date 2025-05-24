@@ -1,42 +1,57 @@
 ﻿using PullReqInfoCollector.Data;
 using PullReqInfoCollector.Model;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Navigation;
+using System.Windows.Shapes;
 
 namespace PullReqInfoCollector;
 
 public partial class MainWindow : Window
 {
-    private string OrganizatioinName = "tera1707";
-    private string ProjectName = "TeraPrivateProject";
-    //private string RepositoryName = "TeraPrivateProject";
-    private string SelfMailAddr = "tera1707@gmail.com";
-
-    AppService app;
+    AppService _app;
+    RepositoryDataHandler _rdh;
 
     private record DisplayData(string DisplayString, string Url);
 
     public MainWindow()
     {
         InitializeComponent();
+
+        _rdh = new RepositoryDataHandler();
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        // リポジトリ情報読み込み
+        var setting = _rdh.Read();
+
+        if (setting == null)
+            return;
+
+        (tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text) = setting.Value;
+
         NavigateToLogonView();
+
+        // リポジトリに接続に行く（ログインしてなかったらPW入力画面、ログインしている場合はjsonが見える→json見えた場合は、ここを押してボタンを押してもらう）
         await Connect(new AppServiceInfo(tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text));
     }
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        app.Dispose();
+        _app.Dispose();
     }
 
     // プルリク情報読み込みボタン
     private async void Button_Click(object sender, RoutedEventArgs e)
     {
-        await GetInformation();
+        // 一旦表示をクリア
+        //lbPullRequest.Items.Clear();
+        lbThread.Items.Clear();
+        var infos = await GetInformation();
+        infos.ForEach(cm => lbThread.Items.Add(cm));
     }
 
     // ログイン画面を終わらせるボタン
@@ -48,7 +63,15 @@ public partial class MainWindow : Window
     // 設定保存ボタン
     private void Button_Click_2(object sender, RoutedEventArgs e)
     {
+        if (string.IsNullOrEmpty(tbOrganizationName.Text) || string.IsNullOrEmpty(tbOrganizationName.Text) || string.IsNullOrEmpty(tbOrganizationName.Text))
+        {
+            MessageBox.Show("リポジトリ情報をちゃんと入れてください。");
+            return;
+        }
 
+        // リポジトリ情報保存
+        var filePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "RepoInfo.dat");
+        File.AppendAllText(filePath, $"{tbOrganizationName.Text},{tbProjectName.Text},{tbSelfMailAddr.Text}");
     }
 
     private void NavigateToLogonView()
@@ -64,52 +87,52 @@ public partial class MainWindow : Window
         btGetInfo.IsEnabled = true;
     }
 
+    // ===================================================================================================
+
     private async Task Connect(AppServiceInfo asi)
     {
-        if (app == null)
+        if (_app == null)
             Disconnect();
 
-        app = new AppService();
+        _app = new AppService();
 
-        await app.Initialize(webView2, asi);
-
-        // とりあえず1秒待つ
-        await Task.Delay(1000);
+        await _app.Initialize(webView2, asi);
     }
 
     private void Disconnect()
     {
-        if (app == null)
+        if (_app == null)
             return;
 
-        app.Dispose();
-        app = null;
+        _app.Dispose();
+        _app = null;
     }
 
-    private async Task GetInformation()
+    private async Task<List<DisplayData>> GetInformation()
     {
-        // 一旦表示をクリア
-        //lbPullRequest.Items.Clear();
-        lbThread.Items.Clear();
+        var infos = new List<DisplayData>();
 
-
-        await app.GetAllPullRequestCommentData((prInfo =>
+        await _app.GetAllPullRequestCommentData((prInfo =>
         {
             // とりあえず条件なしで全部表示
-            DispInfo(prInfo);
+            infos.AddRange(DispInfo(prInfo));
         }));
+
+        return infos;
     }
 
-    void DispInfo(PullRequestInfo pr)
+    private List<DisplayData> DispInfo(PullRequestInfo pr)
     {
+        var infos = new List<DisplayData>();
         var txtPr = $"{pr.Title}, st：{pr.Status}, 作成者：{pr.Author}, 作成日：{pr.CreationDate.ToString("yyyy/MM/dd")}, {(DateTime.Now - pr.CreationDate).Days}日経過, コメント数：{pr.threadInfos.Count()}";
-        //lbPullRequest.Items.Add(new DisplayData(txtPr, pr.Url));
 
         pr.threadInfos.ToList().ForEach(thread =>
         {
             var txtThread = $"{pr.RepositoryName}, {pr.Title} 先頭：{thread.Comments.First().ToString().Replace("\n", "")}, st：{thread.Status}, 先頭者：{thread.Comments.First().Author}, 末尾者：{thread.Comments.Last().Author}";
-            lbThread.Items.Add(new DisplayData(txtThread, pr.Url));
+            infos.Add(new DisplayData(txtThread, pr.Url));
         });
+
+        return infos;
     }
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -120,7 +143,3 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 }
-
-
-
-
