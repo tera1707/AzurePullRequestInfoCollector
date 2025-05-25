@@ -1,5 +1,7 @@
 ﻿using PullReqInfoCollector.Data;
 using PullReqInfoCollector.Model;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -19,6 +21,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        Thread.Sleep(5000);
 
         _rdh = new RepositoryDataHandler();
     }
@@ -47,10 +51,12 @@ public partial class MainWindow : Window
     // プルリク情報読み込みボタン
     private async void Button_Click(object sender, RoutedEventArgs e)
     {
+        var searchWordList = new List<string>() { tbSearchWord1.Text, tbSearchWord2.Text, tbSearchWord3.Text, };
+
         // 一旦表示をクリア
         //lbPullRequest.Items.Clear();
         lbThread.Items.Clear();
-        var infos = await GetInformation();
+        var infos = await GetInformation(searchWordList);
         infos.ForEach(cm => lbThread.Items.Add(cm));
     }
 
@@ -69,9 +75,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        // リポジトリ情報保存
-        var filePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "RepoInfo.dat");
-        File.AppendAllText(filePath, $"{tbOrganizationName.Text},{tbProjectName.Text},{tbSelfMailAddr.Text}");
+        _rdh.Write(tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text);
     }
 
     private void NavigateToLogonView()
@@ -108,14 +112,29 @@ public partial class MainWindow : Window
         _app = null;
     }
 
-    private async Task<List<DisplayData>> GetInformation()
+    private async Task<List<DisplayData>> GetInformation(IReadOnlyList<string> searchWords)
     {
         var infos = new List<DisplayData>();
 
         await _app.GetAllPullRequestCommentData((prInfo =>
         {
-            // とりあえず条件なしで全部表示
-            infos.AddRange(DispInfo(prInfo));
+            // 検索文言が入力されていたら検索、すべて空なら全件表示
+            if (searchWords.All(x => string.IsNullOrEmpty(x)))
+            {
+                infos.AddRange(DispInfo(prInfo));
+            }
+            else
+            {
+                var hitPr = DispInfo(prInfo).Where(dispData =>
+                {
+                    // 検索文言のどれかが表示文言に入っているコメントに絞る
+                    return searchWords
+                    .Where(searchWord => !string.IsNullOrEmpty(searchWord))
+                    .Any(searchWord => dispData.DisplayString.Contains(searchWord));
+                }).ToList();
+
+                infos.AddRange(hitPr);
+            }
         }));
 
         return infos;

@@ -30,7 +30,7 @@ namespace PullReqInfoCollector.Model
         {
             // リポジトリ情報保存
             var filePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "RepoInfo.dat");
-            File.AppendAllText(filePath, $"{OrganizationName},{ProjectName},{SelfMailAddr}");
+            File.WriteAllText(filePath, $"{OrganizationName},{ProjectName},{SelfMailAddr}");
         }
     }
 }
