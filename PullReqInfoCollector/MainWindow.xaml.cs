@@ -22,8 +22,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Thread.Sleep(5000);
-
         _rdh = new RepositoryDataHandler();
     }
 
@@ -45,7 +43,8 @@ public partial class MainWindow : Window
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        _app.Dispose();
+        if (_app is not null)
+            _app.Dispose();
     }
 
     // プルリク情報読み込みボタン

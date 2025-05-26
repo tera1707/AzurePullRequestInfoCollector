@@ -14,8 +14,7 @@ namespace PullReqInfoCollector.Model
         {
 
             // リポジトリ情報読み込み
-            var filePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "RepoInfo.dat");
-
+            var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "RepoInfo.dat");
 
             if (!System.IO.Path.Exists(filePath))
                 return null;
@@ -29,7 +28,7 @@ namespace PullReqInfoCollector.Model
         internal void Write(string OrganizationName, string ProjectName, string SelfMailAddr)
         {
             // リポジトリ情報保存
-            var filePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "RepoInfo.dat");
+            var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "RepoInfo.dat");
             File.WriteAllText(filePath, $"{OrganizationName},{ProjectName},{SelfMailAddr}");
         }
     }
