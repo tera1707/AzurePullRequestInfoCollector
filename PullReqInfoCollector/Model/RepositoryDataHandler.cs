@@ -10,7 +10,7 @@ namespace PullReqInfoCollector.Model
 {
     internal class RepositoryDataHandler
     {
-        internal (string tbOrganizationName, string a, string b)? Read()
+        internal (string tbOrganizationName, string ProjectName)? Read()
         {
 
             // リポジトリ情報読み込み
@@ -22,14 +22,14 @@ namespace PullReqInfoCollector.Model
             var settings = File.ReadAllText(filePath).Split(',');
 
 
-            return (settings[0], settings[1], settings[2]);
+            return (settings[0], settings[1]);
         }
 
-        internal void Write(string OrganizationName, string ProjectName, string SelfMailAddr)
+        internal void Write(string OrganizationName, string ProjectName)
         {
             // リポジトリ情報保存
             var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "RepoInfo.dat");
-            File.WriteAllText(filePath, $"{OrganizationName},{ProjectName},{SelfMailAddr}");
+            File.WriteAllText(filePath, $"{OrganizationName},{ProjectName}");
         }
     }
 }

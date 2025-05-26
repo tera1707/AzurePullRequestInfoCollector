@@ -33,12 +33,12 @@ public partial class MainWindow : Window
         if (setting == null)
             return;
 
-        (tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text) = setting.Value;
+        (tbOrganizationName.Text, tbProjectName.Text) = setting.Value;
 
         NavigateToLogonView();
 
         // リポジトリに接続に行く（ログインしてなかったらPW入力画面、ログインしている場合はjsonが見える→json見えた場合は、ここを押してボタンを押してもらう）
-        await Connect(new AppServiceInfo(tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text));
+        await Connect(new AppServiceInfo(tbOrganizationName.Text, tbProjectName.Text));
     }
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -74,7 +74,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _rdh.Write(tbOrganizationName.Text, tbProjectName.Text, tbSelfMailAddr.Text);
+        _rdh.Write(tbOrganizationName.Text, tbProjectName.Text);
     }
 
     private void NavigateToLogonView()

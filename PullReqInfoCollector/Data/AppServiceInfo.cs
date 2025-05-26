@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PullReqInfoCollector.Data
 {
-    public record AppServiceInfo(string OrganizatioinName, string ProjectName, string SelfMailAddr);
+    public record AppServiceInfo(string OrganizatioinName, string ProjectName);
 }

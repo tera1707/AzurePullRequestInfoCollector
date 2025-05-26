@@ -67,7 +67,7 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="tbSearchWord1" Grid.Row="0" Text="aaaaaaaaa"/>
+                    <TextBox x:Name="tbSearchWord1" Grid.Row="0"/>
                     <TextBox x:Name="tbSearchWord2" Grid.Row="1"/>
                     <TextBox x:Name="tbSearchWord3" Grid.Row="2"/>
 
@@ -96,11 +96,8 @@
                 <TextBlock Grid.Row="1" Text="Project名"/>
                 <TextBox Grid.Row="1" Grid.Column="1" x:Name="tbProjectName" />
 
-                <TextBlock Grid.Row="2" Text="自分のメールアドレス"/>
-                <TextBox Grid.Row="2" Grid.Column="1" x:Name="tbSelfMailAddr" />
 
-                <CheckBox Grid.Row="4" x:Name="cbAllDisp" Content="担当外・Close済みも表示" IsChecked="True"/>
-                <Button Grid.Row="4" Grid.Column="1" Content="設定保存" Click="Button_Click_2" />
+                <Button Grid.Row="2" Grid.ColumnSpan="2" Content="設定保存" Click="Button_Click_2" />
             </Grid>
 
         </Grid>
