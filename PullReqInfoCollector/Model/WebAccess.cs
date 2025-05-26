@@ -9,6 +9,9 @@ namespace PullReqInfoCollector.Model;
 internal class WebAccess : IDisposable
 {
     private WebView2 _webView2;
+
+    // _webView2.CoreWebView2.Navigate(url); した後、
+    // WebResourceResponseReceivedが来て、e.Response.GetContentAsync()が終わるまでの待ちのためのイベント
     private ManualResetEvent manualEvent;
 
     private string? returnObj = null;
@@ -54,7 +57,7 @@ internal class WebAccess : IDisposable
         // 読み込み開始
         _webView2.CoreWebView2.Navigate(url);
         
-        // 読み込み終了待ち(3秒でタイムアウト)
+        // 読み込み終了待ち(10秒でタイムアウト)
         await Task.Run(() => { manualEvent.WaitOne(TimeSpan.FromSeconds(10)); });        
 
         return JsonSerializer.Deserialize<T>(returnObj!);

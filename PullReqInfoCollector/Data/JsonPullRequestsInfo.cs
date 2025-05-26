@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PullReqInfoCollector.Data.PullRequests;
 
-public class PullRequestsInfo
+public class JsonPullRequestsInfo
 {
     public Value[] value { get; set; }
     public int count { get; set; }
@@ -34,7 +34,7 @@ public class Value
     public Reviewer[] reviewers { get; set; }
     public string url { get; set; }
     public bool supportsIterations { get; set; }
-    public PullRequestsThreadsInfo threadsInfo { get; set; }
+    public JsonPullRequestsThreadsInfo threadsInfo { get; set; }
 }
 
 public class Repository

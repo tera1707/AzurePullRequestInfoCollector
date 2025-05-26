@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PullReqInfoCollector.Data.PullRequestsThreads;
 
 
-public class PullRequestsThreadsInfo
+public class JsonPullRequestsThreadsInfo
 {
     public Value[] value { get; set; }
     public int count { get; set; }

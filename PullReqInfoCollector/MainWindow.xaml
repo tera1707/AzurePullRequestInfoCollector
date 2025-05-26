@@ -6,63 +6,100 @@
         xmlns:local="clr-namespace:PullReqInfoCollector" 
         xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
+        Title="プルリクエストコメント検索ツール"
         Loaded="Window_Loaded"
-        Title="MainWindow" Height="900" Width="1800">
-    <Grid>
+        Closing="Window_Closing"
+        Height="800" Width="900">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="1" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="1" />
+        </Style>
+    </Window.Resources>
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
+
+        <!-- 起動時MSアカウントログイン画面 -->
+        <Grid x:Name="WebViewArea" Margin="0,5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <wpf:WebView2 x:Name="webView2" />
+            <Button Grid.Row="1" Content="ログイン完了したらここを押してください" Foreground="Red" Click="Button_Click_1"/>
+        </Grid>
         
-        <wpf:WebView2 x:Name="webView2" Grid.Row="0" Margin="10" />
+        <!-- プルリクコメント検索エリア -->
+        <Grid Grid.Row="0" x:Name="PullReqCommentSearchArea" Visibility="Collapsed" Margin="0,5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
-            <TextBlock Text="Organization名"/>
-            <TextBox x:Name="tbOrganizationName" Width="200"/>
-            <TextBlock Text="Project名"/>
-            <TextBox x:Name="tbProjectName" Width="200"/>
-            <!--<TextBlock Text="Repository名"/>
-            <TextBox x:Name="tbRepositoryName" Width="200"/>-->
-        </StackPanel>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
-            <TextBlock Text="自分のメールアドレス"/>
-            <TextBox x:Name="tbSelfMailAddr" Width="600"/>
-            <CheckBox x:Name="cbAllDisp" Content="担当外・Close済みも表示" IsChecked="True"/>
-        </StackPanel>
-        <Button Grid.Row="3" x:Name="btGetInfo" Content="情報取得" Click="Button_Click" Margin="10" IsEnabled="False"/>
-
-        <Grid ShowGridLines="True" Grid.Row="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
-
-            <ListBox x:Name="lbPullRequest" Grid.Column="0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="String">
-                        <TextBlock>
+                <!-- 検索結果表示リストボックス -->
+                <ListBox x:Name="lbThread" Grid.Row="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="String">
+                            <TextBlock>
                             <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
                                 <TextBlock Text="{Binding DisplayString}" />
                             </Hyperlink>
                         </TextBlock>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-            <ListBox x:Name="lbThread" Grid.Column="1">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="String">
-                        <TextBlock>
-                            <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
-                                <TextBlock Text="{Binding DisplayString}" />
-                            </Hyperlink>
-                        </TextBlock>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="tbSearchWord1" Grid.Row="0"/>
+                    <TextBox x:Name="tbSearchWord2" Grid.Row="1"/>
+                    <TextBox x:Name="tbSearchWord3" Grid.Row="2"/>
+
+                    <Button Grid.RowSpan="3" Grid.Column="1" x:Name="btGetInfo"  Content="プルリクコメント検索" Click="Button_Click" IsEnabled="False"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- 共通エリア(リポジトリ等の情報エリア) -->
+        <Grid Grid.Row="1">
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Organization名"/>
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="tbOrganizationName" />
+
+                <TextBlock Grid.Row="1" Text="Project名"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="tbProjectName" />
+
+
+                <Button Grid.Row="2" Grid.ColumnSpan="2" Content="設定保存" Click="Button_Click_2" />
+            </Grid>
+
         </Grid>
     </Grid>
 </Window>
